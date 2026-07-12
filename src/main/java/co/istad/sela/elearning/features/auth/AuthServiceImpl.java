@@ -3,6 +3,8 @@ package co.istad.sela.elearning.features.auth;
 import co.istad.sela.elearning.config.props.KeycloakAdminClientProps;
 import co.istad.sela.elearning.features.auth.dto.RegisterRequest;
 import co.istad.sela.elearning.features.auth.dto.RegisterResponse;
+import co.istad.sela.elearning.features.student.StudentProfile;
+import co.istad.sela.elearning.features.student.StudentProfileRepository;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ public class AuthServiceImpl implements AuthService{
 
     private final Keycloak keycloak;
     private final KeycloakAdminClientProps props;
+    private final StudentProfileRepository studentProfileRepository;
 
     @Override
     public RegisterResponse register(RegisterRequest registerRequest) {
@@ -75,6 +78,11 @@ public class AuthServiceImpl implements AuthService{
                         .search(user.getUsername())
                         .getFirst();
                 log.info("Created user {}", createdUser.getId());
+
+
+                StudentProfile studentProfile = new StudentProfile();
+                studentProfile.setUserId(createdUser.getId());
+                studentProfileRepository.save(studentProfile);
 
                 // start send email verification
                 UserResource userResource = keycloak
